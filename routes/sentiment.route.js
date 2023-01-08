@@ -1,10 +1,12 @@
 const express = require("express");
-const { getLatest } = require("../controllers/sentiment.controller.js");
+const { getLatest, getTopPositive } = require("../controllers/sentiment.controller.js");
 const { validateKey } = require("../middleware/apiKey.js");
 const router = express.Router();
 
-router.use(validateKey);
+// router.use(validateKey);
 
-router.get("/all", getLatest);
+router
+    .get("/latest", getLatest)
+    .get("/positive", getTopPositive);
 
 module.exports = router;

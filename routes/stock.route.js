@@ -3,15 +3,16 @@ const { getAllStocks, getStock, search, getTopMentions, getTopScore, getTrending
 const { validateKey } = require("../middleware/apiKey.js");
 const router = express.Router();
 
-router.use(validateKey);
+// router.use(validateKey);
 
-router.get("/all", getAllStocks);
-router.get("/", getStock);
-router.get("/search", search);
-router.get("/mentions", getTopMentions);
-router.get("/score", getTopScore);
-router.get("/trending", getTrending);
-router.get("/random", getRandom);
-router.get("/count", getCount);
+router
+    .get("/all", getAllStocks)
+    .get("/get", getStock)
+    .get("/search", search)
+    .get("/mentions", getTopMentions)
+    .get("/score", getTopScore)
+    .get("/trending", getTrending)
+    .get("/random", getRandom)
+    .get("/count", getCount);
 
 module.exports = router;
