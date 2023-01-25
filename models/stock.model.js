@@ -10,7 +10,7 @@ class Stock{
     static getAll(limit) {
         return `SELECT stock.name, stock.symbol, stock.reference_count, stock.created_date, AVG(sentiment.score) as average_sentiment_score FROM sentiment INNER JOIN stock ON sentiment.symbol = stock.symbol GROUP BY stock.name, stock.symbol, stock.reference_count LIMIT ${limit}`;
     }
-
+ 
     // returns one stock based on symbol
     static getOne(symbol) {
         return `SELECT stock.*, AVG(sentiment.score) as average_sentiment_score FROM sentiment RIGHT JOIN stock ON sentiment.symbol = "${symbol}" GROUP BY stock.name, stock.symbol HAVING stock.symbol = "${symbol}"`;

@@ -1,11 +1,11 @@
-class Analytics {
+class Trackings {
 
     // returns top ten winners of today
     static getWinners() {
         return `SELECT symbol, timing, price_change, price_change_pct
-                FROM analytic
+                FROM tracking
                 WHERE timing = (SELECT timing
-                                FROM analytic
+                                FROM tracking
                                 ORDER BY timing DESC
                                 LIMIT 1)
                 ORDER BY price_change_pct DESC
@@ -15,9 +15,9 @@ class Analytics {
     // returns top ten losers of today
     static getLosers() {
         return `SELECT symbol, timing, price_change, price_change_pct
-                FROM analytic
+                FROM tracking
                 WHERE timing = (SELECT timing
-                                FROM analytic
+                                FROM tracking
                                 ORDER BY timing DESC
                                 LIMIT 1)
                 AND price_change_pct IS NOT NULL
@@ -28,4 +28,4 @@ class Analytics {
 }
 
 
-module.exports = Analytics;
+module.exports = Trackings;
