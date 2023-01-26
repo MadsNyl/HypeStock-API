@@ -13,17 +13,17 @@ const getBaseData = async (req, res) => {
         const stockCount = await pool.query(Exchange.getStockCount(exchange));
 
         if (!stockCount[0].length) data.stock_count = 0;
-        else data.stock_count = stockCount[0];
+        else data.stock_count = stockCount[0][0].stock_count;
 
         const commentCount = await pool.query(Exchange.getCommentCount(exchange));
 
         if (!commentCount[0].length) data.comment_count = 0;
-        else data.comment_count = commentCount[0];
+        else data.comment_count = commentCount[0][0].comment_count;
 
         const tweetCount = await pool.query(Exchange.getTweetCount(exchange));
 
         if (!tweetCount[0].length) data.tweet_count = 0;
-        else data.tweet_count = tweetCount[0];
+        else data.tweet_count = tweetCount[0][0].tweet_count;
         
         const comments = await pool.query(Exchange.getTopComments(exchange, limit));
 
@@ -39,9 +39,9 @@ const getBaseData = async (req, res) => {
 
 // get top Reddit comments
 const getTopComments = async (req, res) => {
-    const { exchange, limit, media, sort } = req.query;
+    const { exchange, limit } = req.query;
 
-    if (!exchange || !limit || !media || !sort) return res.sendStatus(400);
+    if (!exchange || !limit) return res.sendStatus(400);
 
     try {
         const results = await pool.query(Exchange.getTopComments(exchange, limit));
@@ -57,9 +57,9 @@ const getTopComments = async (req, res) => {
 
 // get most negative Reddit comments
 const getNegativeComments = async (req, res) => {
-    const { exchange, limit, media, sort } = req.query;
+    const { exchange, limit } = req.query;
 
-    if (!exchange || !limit || !media || !sort) return res.sendStatus(400);
+    if (!exchange || !limit) return res.sendStatus(400);
 
     try {
         const results = await pool.query(Exchange.getNegativeComments(exchange, limit));
@@ -75,9 +75,9 @@ const getNegativeComments = async (req, res) => {
 
 // get most negative Tweets
 const getNegativeTweets = async (req, res) => {
-    const { exchange, limit, media, sort } = req.query;
+    const { exchange, limit } = req.query;
 
-    if (!exchange || !limit || !media || !sort) return res.sendStatus(400);
+    if (!exchange || !limit) return res.sendStatus(400);
 
     try {
         const results = await pool.query(Exchange.getNegativeTweets(exchange, limit));
@@ -93,9 +93,9 @@ const getNegativeTweets = async (req, res) => {
 
 // get most negative Tweets
 const getTopTweets = async (req, res) => {
-    const { exchange, limit, media, sort } = req.query;
+    const { exchange, limit } = req.query;
 
-    if (!exchange || !limit || !media || !sort) return res.sendStatus(400);
+    if (!exchange || !limit) return res.sendStatus(400);
 
     try {
         const results = await pool.query(Exchange.getTopTweets(exchange, limit));
@@ -109,11 +109,49 @@ const getTopTweets = async (req, res) => {
     }
 }
 
+// get comments with most likes
+const getTopLikesComments = async (req, res) => {
+    const { exchange, limit } = req.query;
+
+    if (!exchange || !limit) return res.sendStatus(400);
+
+    try {
+        const results = await pool.query(Exchange.getTopLikesComments(exchange, limit));
+
+        if (!results[0].length) return res.sendStatus(404);
+        else return res.send(results);
+
+    } catch (e) {
+        console.log(e);
+        return res.sendStatus(500);
+    }
+}
+
+// get tweets with most likes
+const getTopLikesTweets = async (req, res) => {
+    const { exchange, limit } = req.query;
+
+    if (!exchange || !limit) return res.sendStatus(400);
+
+    try {
+        const results = await pool.query(Exchange.getTopLikesTweets(exchange, limit));
+
+        if (!results[0].length) return res.sendStatus(404);
+        else return res.send(results);
+
+    } catch (e) {
+        console.log(e);
+        return res.sendStatus(500);
+    } 
+}
+
 
 module.exports = {
     getBaseData,
     getTopComments,
     getNegativeComments,
     getTopTweets,
-    getNegativeTweets
+    getNegativeTweets,
+    getTopLikesComments,
+    getTopLikesTweets
 }

@@ -52,7 +52,7 @@ class Exchange {
             INNER JOIN stock
             ON comment.symbol = stock.symbol
             WHERE stock.exchange = "${exchange}"
-            ORDER BY comment.positive_score
+            ORDER BY comment.negative_score DESC
             LIMIT ${limit}
         `
     }
@@ -78,11 +78,36 @@ class Exchange {
             INNER JOIN stock
             ON tweet.symbol = stock.symbol
             WHERE stock.exchange = "${exchange}"
-            ORDER BY tweet.positive_score
+            ORDER BY tweet.negative_score DESC
             LIMIT ${limit}
         `
     }
 
+    // get comment with most likes
+    static getTopLikesComments(exchange, limit) {
+        return `
+            SELECT comment.*, stock.name
+            FROM comment
+            INNER JOIN stock
+            ON comment.symbol = stock.symbol
+            WHERE stock.exchange = "${exchange}"
+            ORDER BY comment.likes DESC
+            LIMIT ${limit}
+        `
+    }
+
+    // get tweet with most likes
+    static getTopLikesTweets(exchange, limit) {
+        return `
+            SELECT tweet.*, stock.name
+            FROM tweet
+            INNER JOIN stock
+            ON tweet.symbol = stock.symbol
+            WHERE stock.exchange = "${exchange}"
+            ORDER BY tweet.likes DESC
+            LIMIT ${limit}
+        `
+    }
 }
 
 
