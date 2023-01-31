@@ -1,223 +1,50 @@
 const pool = require("../connection.js");
+const { sliceDate, addDays } = require("../helper/formatDate.js");
 const Stock = require("../models/stock.model.js");
 
+const getBaseData = async (req, res) => {
+    const { stock, days } = req.query;
 
-// get count of all stocks
-const getCount = async (req, res) => {
-    try {   
-        const results = await pool.query(Stock.getCount());
-
-        if (!results[0].length) return res.status(404);
-
-        return res.send(results[0]);
-    } catch (error) {
-        console.log(error);
-        return res.sendStatus(500);
-    }
-};
-
-// get all stocks
-const getAllStocks = async (req, res) => {
-    const { limit } = req.query;
-
-    if (!limit) return res.sendStatus(400);
+    if (!stock || !days) return res.sendStatus(400);
 
     try {
-        const results = await pool.query(Stock.getAll(limit));
-
-        if (!results[0].length) return res.status(404);
-
-        return res.send(results[0])
-    } catch (error) {
-        console.log(error);
-        return res.sendStatus(500);
-    }
-    
-};
-
-// get one stock based on symbol, with sentiments and trade analytics
-const getStock = async (req, res) => {
-    const { symbol, sentiment_limit, trades_limit } = req.query;
-    
-    if (!symbol || !sentiment_limit || !trades_limit) return res.sendStatus(400);
-
-    try {
-        const data = {};
-
-        // get base info
-        const base = await pool.query(Stock.getOne(symbol));
-
-        if (!base[0].length) return res.sendStatus(404);
-
-        data.base = base[0];
-
-        // get sentiments
-        const sentiments = await pool.query(Stock.getSentimentsOfOne(symbol, sentiment_limit));
-
-        if (!sentiments[0].length) data.sentiments = [];
-        else data.sentiments = sentiments[0];
-
-        // get trades
-        const trades = await pool.query(Stock.getTradesOfOne(symbol, trades_limit));
-
-        if (!trades[0].length) data.trades = [];
-        else data.trades = trades[0];
-
-        return res.send(data);
-
-    } catch (error) {
-        console.log(error);
-        return res.sendStatus(500);
-    }
-};
-
-// search for stock
-const search = async (req, res) => {
-    const { search } = req.query;
-
-    if (!search) return res.sendStatus(400);
-
-    try {
-        const results = await pool.query(Stock.search(search));
-
-        if (!results[0].length) return res.sendStatus(404);
-
-        return res.send(results[0]);
-    } catch (error) {
-        console.log(error);
-        return res.sendStatus(500);
-    }
-};
-
-// stock with most occurences
-const getTopMentions = async (req, res) => {
-    const { limit } = req.query;
-
-    if (!limit) return res.sendStatus(400);
-
-    try {
-        const data = {};
-
-        // get base info
-        const base = await pool.query(Stock.getTopMentions());
-
-        if (!base[0].length) return res.sendStatus(404);
-
-        data.base = base[0];
-
-        // get trades
-        const symbol = base[0][0].symbol;
-        const trades = await pool.query(Stock.getTradesOfOne(symbol, limit));
+        const stockInfo = await pool.query(Stock.getStockInfo(stock));
+        const commentsCount = await pool.query(Stock.getCommentsCount(stock, days));
+        const tweetsCount = await pool.query(Stock.getTweetsCount(stock, days));
+        const commentsLikes = await pool.query(Stock.getTotalCommentsLikes(stock, days));
+        const tweetsLikes = await pool.query(Stock.getTotalTweetsLikes(stock, days));
+        const trackings = await pool.query(Stock.getTrackings(stock, days));
         
-        if (!trades[0].length) data.trades = [];
-        else data.trades = trades[0];
+        const commentData = [];
+        for (const [index, t] of trackings[0].entries()) {
+            let tempDate = addDays(t.timing, 1);
+            const date = sliceDate(tempDate, 10);
+            trackings[0][index].timing = date;
+            const comment = await pool.query(Stock.getDailyCommentData(stock, date));
+            comment[0][0].timing = date;
+            commentData.push(comment[0][0]);
+        }
 
-        return res.send(data);
-
-    } catch (error) {
-        console.log(error);
-        return res.sendStatus(500);
-    }
-};
-
-// stock with at least 100 mentions and highest average sentiment score
-const getTopScore = async (req, res) => {
-    const { limit } = req.query;
-
-    if (!limit) return res.sendStatus(400);
-
-    try {
-        const data = {};
-
-        // get base info
-        const base = await pool.query(Stock.getTopScore());
-
-        if (!base[0].length) return res.sendStatus(404);
-
-        data.base = base[0];
-
-        // get trades
-        const symbol = base[0][0].symbol;
-        const trades = await pool.query(Stock.getTradesOfOne(symbol, limit));
-        
-        if (!trades[0].length) data.trades = [];
-        else data.trades = trades[0];
+        const data = {
+            symbol: stockInfo[0][0].symbol,
+            name: stockInfo[0][0].name,
+            exchange: stockInfo[0][0].exchange,
+            created_date: stockInfo[0][0].created_date,
+            comments_count: commentsCount[0][0].comments_count,
+            tweets_count: tweetsCount[0][0].tweets_count,
+            comments_likes: commentsLikes[0][0].comments_likes,
+            tweets_likes: tweetsLikes[0][0].tweets_likes,
+            trackings: trackings[0],
+            comment_data: commentData
+        }
 
         return res.send(data);
     } catch (error) {
         console.log(error);
         return res.sendStatus(500);
     }
-};
-
-// most trending stock based on last 1000 sentiments
-const getTrending = async (req, res) => {
-    const { limit } = req.query;
-
-    if (!limit) return res.sendStatus(400);
-
-    try {
-        const data = {};
-
-        // get base info
-        const base = await pool.query(Stock.getTrending());
-
-        if (!base[0].length) return res.sendStatus(404);
-
-        data.base = base[0];
-
-        // get trades
-        const symbol = base[0][0].symbol;
-        const trades = await pool.query(Stock.getTradesOfOne(symbol, limit));
-        
-        if (!trades[0].length) data.trades = [];
-        else data.trades = trades[0];
-
-        return res.send(data);
-    } catch (error) {
-        console.log(error);
-        return res.sendStatus(500);
-    }
-};
-
-
-// get random stock
-const getRandom = async (req, res) => {
-    const { limit } = req.query;
-
-    if (!limit) return res.sendStatus(400);
-
-    try {
-        const data = {};
-
-        // get base info
-        const base = await pool.query(Stock.getRandom());
-
-        if (!base[0].length) return res.sendStatus(404);
-
-        data.base = base[0];
-
-        // get trades
-        const symbol = base[0][0].symbol;
-        const trades = await pool.query(Stock.getTradesOfOne(symbol, limit));
-        
-        if (!trades[0].length) data.trades = [];
-        else data.trades = trades[0];
-
-        return res.send(data);
-    } catch (error) {
-        console.log(error);
-        return res.sendStatus(500);
-    }
-};
+}
 
 module.exports = {
-    getAllStocks,
-    getStock,
-    search,
-    getTopMentions,
-    getTopScore,
-    getTrending,
-    getRandom,
-    getCount
+    getBaseData
 }

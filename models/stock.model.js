@@ -1,54 +1,79 @@
-
 class Stock{
 
-    // returns count of stocks
-    static getCount() {
-       return "SELECT COUNT(*) AS stock_count FROM stock";
+    // returns base info about stock
+    static getStockInfo(stock) {
+        return `
+            SELECT *
+            FROM stock
+            WHERE symbol = "${stock}"
+        `
     }
 
-    // returns all stocks
-    static getAll(limit) {
-        return `SELECT stock.name, stock.symbol, stock.reference_count, stock.created_date, AVG(sentiment.score) as average_sentiment_score FROM sentiment INNER JOIN stock ON sentiment.symbol = stock.symbol GROUP BY stock.name, stock.symbol, stock.reference_count LIMIT ${limit}`;
-    }
- 
-    // returns one stock based on symbol
-    static getOne(symbol) {
-        return `SELECT stock.*, AVG(sentiment.score) as average_sentiment_score FROM sentiment RIGHT JOIN stock ON sentiment.symbol = "${symbol}" GROUP BY stock.name, stock.symbol HAVING stock.symbol = "${symbol}"`;
-    }
-
-    // returns sentiments of one stock
-    static getSentimentsOfOne(symbol, limit) {
-        return `SELECT symbol, score, is_reddit, post_url, permalink, comment_body, author, created_date FROM sentiment WHERE symbol = "${symbol}" AND score != 0 ORDER BY created_date DESC LIMIT ${limit}`;
+    // returns count of comments of given stock
+    // within given days
+    static getCommentsCount(stock, days) {
+        return `
+            SELECT COUNT(*) as comments_count
+            FROM comment
+            WHERE symbol = "${stock}"
+            AND comment.created_date >= DATE(NOW() - INTERVAL ${days} DAY)
+        `
     }
 
-    // returns trade analytics of one stock
-    static getTradesOfOne(symbol, limit) {
-        return `SELECT * FROM analytic WHERE symbol = '${symbol}' ORDER BY timing ASC LIMIT ${limit}`;
+    // returns count of tweets of given stock
+    // within given days
+    static getTweetsCount(stock, days) {
+        return `
+            SELECT COUNT(*) as tweets_count
+            FROM tweet
+            WHERE symbol = "${stock}"
+            AND tweet.created_date >= DATE(NOW() - INTERVAL ${days} DAY)
+        `
     }
 
-    // returns stock based on search for symbol or company name
-    static search(search) {
-        return `SELECT * FROM stock WHERE name like "%${search}%" OR symbol = "${search}" LIMIT 10`;
+    // returns total sum of likes from comments of given stock
+    // within given days
+    static getTotalCommentsLikes(stock, days) {
+        return `
+            SELECT SUM(likes) as comments_likes
+            FROM comment
+            WHERE symbol = "${stock}"
+            AND comment.created_date >= DATE(NOW() - INTERVAL ${days} DAY)
+        `
+    } 
+
+    // returns total sum of likes from tweets of given stock
+    // within given days
+    static getTotalTweetsLikes(stock, days) {
+        return `
+            SELECT SUM(likes) as tweets_likes
+            FROM tweet
+            WHERE symbol = "${stock}"
+            AND tweet.created_date >= DATE(NOW() - INTERVAL ${days} DAY)
+        `
     }
 
-    // returns stock with highest average sentiment score
-    static getTopScore() {
-        return "SELECT stock.*, AVG(sentiment.score) as average_sentiment_score FROM sentiment INNER JOIN stock ON sentiment.symbol = stock.symbol GROUP BY stock.name, stock.symbol, stock.reference_count HAVING average_sentiment_score = (SELECT MAX(average_sentiment_score) FROM (SELECT AVG(sentiment.score) as average_sentiment_score FROM sentiment INNER JOIN stock ON sentiment.symbol = stock.symbol WHERE stock.reference_count >= 100 GROUP BY stock.name) as avg)";
+    // returns all trackings of price of given stock
+    // within given days
+    static getTrackings(stock, days) {
+        return `
+            SELECT *
+            FROM tracking
+            WHERE symbol = "${stock}"
+            AND timing >= DATE(NOW() - INTERVAL ${days} DAY)
+            ORDER BY timing DESC
+        `        
     }
 
-    // returns stock with most occurences
-    static getTopMentions() {
-        return `SELECT stock.*, AVG(sentiment.score) as average_sentiment_score FROM sentiment INNER JOIN stock ON sentiment.symbol = stock.symbol GROUP BY stock.name, stock.symbol, stock.reference_count HAVING stock.reference_count = (SELECT MAX(stock.reference_count) FROM stock) LIMIT 1`;
-    }
-
-    // returns most trending stock based on the last 1000 sentiments
-    static getTrending() {
-        return "SELECT stock.symbol, stock.name, stock.reference_count, symbol_count, AVG(sentiment.score) as average_sentiment_score FROM stock INNER JOIN (SELECT symbol, COUNT(symbol) as symbol_count FROM (SELECT * FROM sentiment ORDER BY created_date DESC LIMIT 1000) AS all_sentiments GROUP BY symbol) as s ON stock.symbol = s.symbol INNER JOIN sentiment ON sentiment.symbol = s.symbol GROUP BY stock.symbol ORDER BY symbol_count DESC LIMIT 1";
-    }
-
-    // returns random stock
-    static getRandom() {
-        return `SELECT stock.*, AVG(sentiment.score) as average_sentiment_score FROM sentiment INNER JOIN stock ON sentiment.symbol = stock.symbol GROUP BY stock.symbol ORDER BY RAND() LIMIT 1`;
+    // returns total likes and count of comments of given stock
+    // on a given day
+    static getDailyCommentData(stock, day) {
+        return `
+            SELECT COUNT(*) as comments_count, SUM(likes) as comments_likes
+            FROM comment
+            WHERE symbol = "${stock}"
+            AND created_date between "${day}" AND "${day + " 23:59:59"}"
+        `
     }
 
 }
