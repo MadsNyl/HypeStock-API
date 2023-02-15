@@ -1,6 +1,7 @@
 const pool = require("../../connection.js");
 const Article = require("../models/article.model.js");
 const Provider = require("../models/provider.model.js");
+const { populateArticlesWithRelatedStocks } = require("../utils/PopulateArticles.js");
 
 
 const getArticle = async (req, res) => {
@@ -36,11 +37,7 @@ const getBaseData = async (req, res) => {
         providers = providers[0].map((item) => item.provider);
         const articles = await pool.query(Article.getLatestArticles(limit))
 
-        for (let i = 0; i < articles[0].length; i++) {
-            let relatedStocks = await pool.query(Article.getRelatedStocksToArticle(articles[0][i].id));
-            relatedStocks = relatedStocks[0].map(item => item.symbol);
-            articles[0][i].related_stocks = relatedStocks;
-        }
+        await populateArticlesWithRelatedStocks(articles);
 
         return res.send({
             article_count: article_count[0][0].article_count,
@@ -54,7 +51,89 @@ const getBaseData = async (req, res) => {
     }
 }
 
+const getLatestArticles = async (req, res) => {
+    const { limit } = req.query;
+
+    if (!limit) return res.sendStatus(400);
+
+    try {
+        const articles = await pool.query(Article.getLatestArticles(limit));
+
+        await populateArticlesWithRelatedStocks(articles);
+
+        return res.send({
+            articles: articles[0]
+        });
+    } catch (e) {
+        console.log(e);
+        return res.sendStatus(500);
+    }
+}
+
+const getArticlesByProvider = async (req, res) => {
+    const { provider, limit } = req.query;
+
+    if (!provider || !limit) return res.sendStatus(400);
+
+    try {
+        const articles = await pool.query(Article.getLatestArticlesByProvider(provider, limit));
+
+        await populateArticlesWithRelatedStocks(articles);
+
+        return res.send({
+            articles: articles[0]
+        })
+
+    } catch (e) {
+        console.log(e);
+        return res.sendStatus(500);
+    }
+}
+
+const getArticlesWithMostRelatedStocks = async (req, res) => {
+    const { limit } = req.query;
+
+    if (!limit) return res.sendStatus(400);
+
+    try {
+        const articles = await pool.query(Article.getArticlesWithMostRelatedStocks(limit));
+
+        await populateArticlesWithRelatedStocks(articles);
+
+        return res.send({
+            articles: articles[0]
+        });
+
+    } catch (e) {
+        console.log(e);
+        return res.sendStatus(500);
+    }
+}
+
+const getArticlesWithMostRelatedStocksByProvider = async (req, res) => {
+    const { provider, limit } = req.query;
+
+    if (!provider || !limit) return res.sendStatus(400);
+
+    try {
+        const articles = await pool.query(Article.getArticleWithMostRelatedStocksByProvider(provider, limit));
+
+        await populateArticlesWithRelatedStocks(articles);
+
+        return res.send({
+            articles: articles[0]
+        })
+    } catch (e) {
+        console.log(e);
+        return res.sendStatus(500);
+    }
+}
+
 module.exports = {
     getArticle,
-    getBaseData
+    getBaseData,
+    getLatestArticles,
+    getArticlesByProvider,
+    getArticlesWithMostRelatedStocks,
+    getArticlesWithMostRelatedStocksByProvider
 }

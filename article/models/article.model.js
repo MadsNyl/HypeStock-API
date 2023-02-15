@@ -26,6 +26,18 @@ class Article {
         `
     }
 
+    static getArticlesWithMostRelatedStocks(limit) {
+        return `
+            SELECT article.*, COUNT(article_stock.article_id) as stock_count
+            FROM article
+            INNER JOIN article_stock
+            ON article.id = article_stock.article_id
+            GROUP BY article_stock.article_id
+            ORDER BY stock_count DESC
+            LIMIT ${limit}
+        `
+    }
+
     static getArticle(id) {
         return `
             SELECT *
@@ -39,6 +51,29 @@ class Article {
             SELECT symbol
             FROM article_stock
             WHERE article_id = ${id} 
+        `
+    }
+
+    static getLatestArticlesByProvider(provider, limit) {
+        return `
+            SELECT *
+            FROM article
+            WHERE provider = "${provider}"
+            ORDER BY created_date DESC
+            LIMIT ${limit}
+        `
+    }
+
+    static getArticleWithMostRelatedStocksByProvider(provider, limit) {
+        return `
+            SELECT article.*, COUNT(article_stock.article_id) as stock_count
+            FROM article
+            INNER JOIN article_stock
+            ON article.id = article_stock.article_id
+            WHERE provider = "${provider}"
+            GROUP BY article_stock.article_id
+            ORDER BY stock_count DESC
+            LIMIT ${limit}
         `
     }
 
