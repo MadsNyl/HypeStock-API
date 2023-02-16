@@ -7,6 +7,7 @@ const trackingsRoute = require("./routes/trackings.route.js");
 const exchangeRoute = require("./routes/exchange.route.js");
 const statsRoute = require("./routes/stats.route.js");
 const articleRoute = require("./article/router.js");
+const redditRoute = require("./reddit/router.js");
 
 const app = express();
 
@@ -20,6 +21,8 @@ app.use("/api/v1/key/", apiKeyRoute);
 app.use("/api/v1/trackings/", trackingsRoute);    
 app.use("/api/v1/exchange/", exchangeRoute);    
 app.use("/api/v1/stats/", statsRoute);
+
 app.use("/api/v1/articles/", articleRoute);
+app.use("/api/v1/reddit/", redditRoute);
 
 app.listen(8800);

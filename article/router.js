@@ -1,6 +1,6 @@
 const express = require("express");
 const { getArticle, getBaseData, getArticlesByProvider, getArticlesWithMostRelatedStocks, getArticlesWithMostRelatedStocksByProvider, getLatestArticles } = require("./controllers/article.controller.js");
-const router = express.Router()
+const router = express.Router();
 
 router
     .get("/article", getArticle)

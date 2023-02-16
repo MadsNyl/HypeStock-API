@@ -1,46 +1,76 @@
 const pool = require("../../connection.js");
-const Article = require("../models/article.model.js");
-const Provider = require("../models/provider.model.js");
+const Reddit = require("../models/reddit.model.js");
+const Subreddit = require("../models/subreddit.model.js");
 
-
-const getArticle = async (req, res) => {
+const getComment = async (req, res) => {
     const { id } = req.query;
 
     if (!id) return res.sendStatus(400);
 
     try {
-        const articleData = await pool.query(Article.getArticle(id));
-        let stocks = await pool.query(Article.getRelatedStocksToArticle(id));
-        stocks = stocks[0].map((item) => item.symbol)
+        const comment = await pool.query(Reddit.getComment(id));
 
         return res.send({
-            related_stocks: stocks,
-            article: articleData[0][0]
+            comment: comment[0]
         });
-    } catch(e) {
+    } catch (e) {
+        console.log(e);
+        return res.sendStatus(500);
+    }
+}
+
+const getLatestComments = async (req, res) => {
+    const { limit } = req.query;
+
+    if (!limit) return res.sendStatus(400);
+
+    try {
+        const comments = await pool.query(Reddit.getLatestComments(limit));
+
+        return res.send({
+            comments: comments[0]
+        });
+    } catch (e) {
+        console.log(e);
+        return res.sendStatus(500);
+    }
+}
+
+const getCommentByStock = async (req, res) => {
+    const { stock, limit } = req.query;
+
+    if (!stock || !limit) return res.sendStatus(400);
+
+    try {
+        const comment = await pool.query(Reddit.getCommentsByStock(stock, limit));
+
+        return res.send({
+            comment: comment[0]
+        });
+    } catch (e) {
         console.log(e);
         return res.sendStatus(500);
     }
 }
 
 const getBaseData = async (req, res) => {
-
     const { limit } = req.query;
 
-    if (!limit) return res.sendStatus(400);
+    if (!limit) return res.sendStatus(500);
 
     try {
-        const article_count = await pool.query(Article.getCount());
-        const provider_count = await pool.query(Provider.getDistinctProviderCount())
-        let providers = await pool.query(Provider.getProviders());
-        providers = providers[0].map((item) => item.provider);
-        const articles = await pool.query(Article.getLatestArticles(limit))
+        const commentCount = await pool.query(Reddit.getCommentCount());
+        let subreddits = await pool.query(Subreddit.getSubreddits());
+        const subredditCount = await pool.query(Subreddit.getDistinctSubredditCount());
+        const comments = await pool.query(Reddit.getLatestComments(limit));
+
+        subreddits = subreddits[0].map(item => item.subreddit);
 
         return res.send({
-            article_count: article_count[0][0].article_count,
-            provider_count: provider_count[0][0].provider_count,
-            providers: providers,
-            articles: articles[0]
+            subreddit_count: subredditCount[0][0].subreddit_count,
+            comment_count: commentCount[0][0].comment_count,
+            subreddits: subreddits,
+            comments: comments[0]
         });
     } catch (e) {
         console.log(e);
@@ -49,6 +79,8 @@ const getBaseData = async (req, res) => {
 }
 
 module.exports = {
-    getArticle,
+    getComment,
+    getCommentByStock,
+    getLatestComments,
     getBaseData
 }
