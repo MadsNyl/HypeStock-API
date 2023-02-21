@@ -18,11 +18,54 @@ class Reddit {
         `
     }
 
+    static getCommentsByStockSearch(limit, stock) {
+        return `
+            SELECT comment.*
+            FROM comment
+            INNER JOIN
+            stock ON comment.symbol = stock.symbol
+            WHERE stock.symbol = "${stock}"
+            OR stock.name LIKE "%${stock}%"
+            ORDER BY comment.created_date DESC
+            LIMIT ${limit}
+        `
+    }
+
     static getLatestComments(limit) {
         return `
             SELECT *
             FROM comment
             ORDER BY created_date DESC
+            LIMIT ${limit}
+        `
+    }
+
+    static getLatestCommentsBySubreddit(limit, subreddit) {
+        return `
+            SELECT *
+            FROM comment
+            WHERE subreddit = "${subreddit}"
+            ORDER BY created_date DESC
+            LIMIT ${limit}
+        `
+    }
+
+    static getMostLikedCommentsBySubreddit(limit, subreddit) {
+        return `
+            SELECT *
+            FROM comment
+            WHERE subreddit = "${subreddit}"
+            ORDER BY likes DESC
+            LIMIT ${limit}
+        `
+    }
+
+    static getMostDislikedCommentsBySubreddit(limit, subreddit) {
+        return `
+            SELECT *
+            FROM comment
+            WHERE subreddit = "${subreddit}"
+            ORDER BY likes
             LIMIT ${limit}
         `
     }

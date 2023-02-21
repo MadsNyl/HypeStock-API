@@ -78,9 +78,118 @@ const getBaseData = async (req, res) => {
     }
 }
 
+const getMostLikedComments = async (req, res) => {
+    const { limit } = req.query;
+
+    if (!limit) return res.sendStatus(400);
+
+    try {
+        const comments = await pool.query(Reddit.getMostLikedComments(limit));
+
+        return res.send({
+            comments: comments[0]
+        });
+    } catch (e) {
+        console.log(e);
+        return res.sendStatus(500);
+    }
+}
+
+const getMostDislikedComments = async (req, res) => {
+    const { limit } = req.query;
+
+    if (!limit) return res.sendStatus(400);
+
+    try {
+        const comments = await pool.query(Reddit.getMostDislikedComments(limit));
+
+        return res.send({
+            comments: comments[0]
+        });
+    } catch (e) {
+        console.log(e);
+        return res.sendStatus(500);
+    }
+}
+
+const getLatestCommentsBySubreddit = async (req, res) => {
+    const { limit, subreddit } = req.query;
+
+    if (!limit || !subreddit) return res.sendStatus(400);
+
+    try {
+        const comments = await pool.query(Reddit.getLatestCommentsBySubreddit(limit, subreddit));
+
+        return res.send({
+            comments: comments[0]
+        });
+    } catch (e) {
+        console.log(e);
+        return res.sendStatus(500);
+    }
+}
+
+const getMostLikedCommentsBySubreddit = async (req, res) => {
+    const { limit, subreddit } = req.query;
+
+    if (!limit || !subreddit) return res.sendStatus(400);
+
+    try {
+        const comments = await pool.query(Reddit.getMostLikedCommentsBySubreddit(limit, subreddit));
+
+        return res.send({
+            comments: comments[0]
+        })
+    } catch (e) {
+        console.log(e);
+        return res.sendStatus(500);
+    } 
+}
+
+const getMostDisikedCommentsBySubreddit = async (req, res) => {
+    const { limit, subreddit } = req.query;
+
+    if (!limit || !subreddit) return res.sendStatus(400);
+
+    try {
+        const comments = await pool.query(Reddit.getMostDislikedCommentsBySubreddit(limit, subreddit));
+
+        return res.send({
+            comments: comments[0]
+        })
+    } catch (e) {
+        console.log(e);
+        return res.sendStatus(500);
+    } 
+}
+
+const getCommentsByStockSearch = async (req, res) => {
+    const { limit, stock } = req.query;
+
+    if (!limit || !stock) return res.sendStatus(400);
+
+    try {
+        const comments = await pool.query(Reddit.getCommentsByStockSearch(limit, stock));
+
+        return res.send({
+            comments: comments[0]
+        });
+    } catch (e) {
+        console.log(e);
+        return res.sendStatus(500);
+    }
+}
+
+
 module.exports = {
     getComment,
     getCommentByStock,
     getLatestComments,
-    getBaseData
+    getBaseData,
+    getMostLikedComments,
+    getMostDislikedComments,
+    getLatestCommentsBySubreddit,
+    getMostLikedCommentsBySubreddit,
+    getMostDisikedCommentsBySubreddit,
+    getCommentsByStockSearch
 }
