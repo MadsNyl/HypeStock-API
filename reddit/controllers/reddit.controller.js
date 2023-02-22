@@ -63,12 +63,21 @@ const getBaseData = async (req, res) => {
         let subreddits = await pool.query(Subreddit.getSubreddits());
         const subredditCount = await pool.query(Subreddit.getDistinctSubredditCount());
         const comments = await pool.query(Reddit.getLatestComments(limit));
+        const topSubreddit = await pool.query(Subreddit.getTopSubredditOfTheWeek());
+        const topSubredditStock = await pool.query(Subreddit.getTopStockOfSubredditOfTheWeek(topSubreddit[0][0].subreddit));
 
         subreddits = subreddits[0].map(item => item.subreddit);
 
         return res.send({
             subreddit_count: subredditCount[0][0].subreddit_count,
             comment_count: commentCount[0][0].comment_count,
+            top_subreddit: {
+                subreddit: topSubreddit[0][0].subreddit,
+                distinct_symbols: topSubreddit[0][0].distinct_symbols,
+                comment_count: topSubreddit[0][0].comment_count,
+                top_stock: topSubredditStock[0][0].symbol,
+                stock_count: topSubredditStock[0][0].symbol_count
+            },
             subreddits: subreddits,
             comments: comments[0]
         });
