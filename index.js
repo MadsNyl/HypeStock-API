@@ -1,6 +1,6 @@
 const express = require("express");
 const cors = require("cors");
-const stockRoute = require("./routes/stock.route.js");
+const stockRoute = require("./stock/router.js");
 const sentimentRoute = require("./routes/sentiment.route.js");
 const apiKeyRoute = require("./routes/apiKey.route.js");
 const trackingsRoute = require("./routes/trackings.route.js");

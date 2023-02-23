@@ -113,6 +113,14 @@ class Reddit {
         `
     }
 
+    static getCommentLikesAndCountByStockAndDays(stock, days) {
+        return `
+            SELECT SUM(likes) as comment_likes, COUNT(*) as comment_count
+            FROM comment
+            WHERE symbol = "${stock}"
+            AND comment.created_date >= DATE(NOW() - INTERVAL ${days} DAY)
+        `
+    }
 }
 
 module.exports = Reddit;

@@ -34,6 +34,16 @@ class Subreddit {
             LIMIT 1
         `
     }
+
+    static getStockMentionsBySubredditAndDays(stock, days) {
+        return `
+            SELECT subreddit, COUNT(CASE WHEN symbol = "${stock}" THEN 1 END) as stock_count, COUNT(symbol) as total_count
+            FROM comment
+            WHERE created_date >= DATE(NOW() - INTERVAL ${days} DAY)
+            GROUP BY subreddit
+            ORDER BY stock_count DESC
+        `
+    }
 }
 
 module.exports = Subreddit;

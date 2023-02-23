@@ -77,6 +77,17 @@ class Article {
         `
     }
 
+    static getArticleCountByStockAndDays(stock, days) {
+        return `
+            SELECT COUNT(*) as article_count
+            FROM article
+            INNER JOIN
+            article_stock ON article.id = article_stock.article_id
+            WHERE symbol = "${stock}"
+            AND article.created_date >= DATE(NOW() - INTERVAL ${days} DAY)
+        `
+    }
+
 }
 
 module.exports = Article;
