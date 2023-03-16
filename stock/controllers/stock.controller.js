@@ -20,6 +20,9 @@ const getBasedata = async (req, res) => {
         const articleCount = await pool.query(Article.getArticleCountByStockAndDays(stock, days));
         const trackings = await pool.query(Tracking.getTrackingsByDays(stock, days));
         const trackingStart = await pool.query(Tracking.getFirstTracking(stock));
+        const redditTrackings = await pool.query(Tracking.getRedditTrackingsByDays(stock, days));
+        const redditLikes = await pool.query(Tracking.getRedditLikesByDays(stock, days));
+        const articleTrackings = await pool.query(Tracking.getArticleTrackingsByDays(stock, days));
 
         return res.send({
             stock_info: stockInfo[0][0],
@@ -29,7 +32,10 @@ const getBasedata = async (req, res) => {
             article_info: articleCount[0][0],      
             tracking_info: {
                 first_tracking: trackingStart[0][0],
-                trackings: trackings[0]
+                trackings: trackings[0],
+                reddit: redditTrackings[0],
+                reddit_likes: redditLikes[0],
+                article: articleTrackings[0]
             }
         });
     } catch (e) {

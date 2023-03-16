@@ -20,6 +20,42 @@ class Tracking {
         `
     }
 
+    static getArticleTrackingsByDays(stock, days) {
+        return `
+            SELECT COUNT(*) as count
+            FROM article
+            INNER JOIN 
+            article_stock
+            ON article.id = article_stock.article_id
+            WHERE symbol = "${stock}"
+            GROUP BY DAY(created_date)
+            ORDER BY DAY(created_date)
+            LIMIT ${days}
+        `
+    }
+
+    static getRedditTrackingsByDays(stock, days) {
+        return `
+            SELECT COUNT(*) as count
+            FROM comment
+            WHERE symbol = "${stock}"
+            GROUP BY DAY(created_date)
+            ORDER BY DAY(created_date)
+            LIMIT ${days}
+        `
+    }
+
+    static getRedditLikesByDays(stock, days) {
+        return `
+            SELECT SUM(likes) as likes
+            FROM comment
+            WHERE symbol = "${stock}"
+            GROUP BY DAY(created_date)
+            ORDER BY DAY(created_date)
+            LIMIT ${days}
+        `
+    }
+
 }
 
 module.exports = Tracking;
