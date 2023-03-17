@@ -1,5 +1,12 @@
 class Stock {
 
+    static getStockCount() {
+        return `
+            SELECT COUNT(*) as count
+            FROM stock
+        `
+    }
+
     static getStockInfo(stock) {
         return `
             SELECT *
