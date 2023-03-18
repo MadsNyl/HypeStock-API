@@ -121,6 +121,52 @@ class Reddit {
             AND comment.created_date >= DATE(NOW() - INTERVAL ${days} DAY)
         `
     }
+
+    static getTopStocksWithMostLikesInInterval(days, limit) {
+        return `
+            SELECT symbol, SUM(likes) as count
+            FROM comment
+            WHERE LENGTH(symbol) > 2
+            AND created_date >= DATE(NOW() - INTERVAL ${days} DAY)
+            GROUP BY symbol
+            ORDER BY count DESC
+            LIMIT ${limit}
+        `
+    } 
+
+    static getTopStocksWithMostLikes(limit) {
+        return `
+            SELECT symbol, SUM(likes) as count
+            FROM comment
+            WHERE LENGTH(symbol) > 2
+            GROUP BY symbol
+            ORDER BY count DESC
+            LIMIT ${limit}
+        `
+    }
+
+    static getMostMentionedStocks(limit) {
+        return `
+            SELECT symbol, COUNT(*) as count
+            FROM comment
+            WHERE LENGTH(symbol) > 2
+            GROUP BY symbol
+            ORDER BY count DESC
+            LIMIT ${limit}
+        `
+    }
+
+    static getMostMentionedStocksInInterval(limit, days) {
+        return `
+            SELECT symbol, COUNT(*) as count
+            FROM comment
+            WHERE LENGTH(symbol) > 2
+            AND created_date >= DATE(NOW() - INTERVAL ${days} DAY)
+            GROUP BY symbol
+            ORDER BY count DESC
+            LIMIT ${limit}
+        `
+    }
 }
 
 module.exports = Reddit;

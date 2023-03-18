@@ -88,6 +88,33 @@ class Article {
         `
     }
 
+    static getMostMentionedStocksInInterval(limit, days) {
+        return `
+            SELECT symbol, COUNT(*) as count
+            FROM article
+            INNER JOIN article_stock
+            ON article.id = article_stock.article_id
+            WHERE LENGTH(symbol) > 2
+            AND created_date >= DATE(NOW() - INTERVAL ${days} DAY)
+            GROUP BY symbol
+            ORDER BY count DESC
+            LIMIT ${limit}
+        `
+    }
+
+    static getMostMentionedStocks(limit) {
+        return `
+            SELECT symbol, COUNT(*) as count
+            FROM article
+            INNER JOIN article_stock
+            ON article.id = article_stock.article_id
+            WHERE LENGTH(symbol) > 2
+            GROUP BY symbol
+            ORDER BY count DESC
+            LIMIT ${limit}
+        `
+    }
+
 }
 
 module.exports = Article;
