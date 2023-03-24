@@ -17,18 +17,29 @@ const getBasedata = async (req, res) => {
         const subreddits = await pool.query(Subreddit.getStockMentionsBySubredditAndDays(stock, days));
         const providers = await pool.query(Provider.getStockMentionsByProviderAndDays(stock, days));
         const commentStats = await pool.query(Reddit.getCommentLikesAndCountByStockAndDays(stock, days));
+        const prevCommentStats = await pool.query(Reddit.getCommentLikesAndCountByStockAndInterval(stock, days));
         const articleCount = await pool.query(Article.getArticleCountByStockAndDays(stock, days));
         const trackings = await pool.query(Tracking.getTrackingsByDays(stock, days));
         const trackingStart = await pool.query(Tracking.getFirstTracking(stock));
         const redditTrackings = await pool.query(Tracking.getRedditTrackingsByDays(stock, days));
         const redditLikes = await pool.query(Tracking.getRedditLikesByDays(stock, days));
         const articleTrackings = await pool.query(Tracking.getArticleTrackingsByDays(stock, days));
+        const redditMentions = await pool.query(Reddit.getMentionsByStockAndDays(stock, days));
+        const prevRedditMentions = await pool.query(Reddit.getMentionsByStockAndInterval(stock, days));
+
+
+        // increase of reddit likes
+        // increase of mentions in reddit
+        // increase of mentions in articles
 
         return res.send({
             stock_info: stockInfo[0][0],
             subreddits: subreddits[0],
             providers: providers[0],
             comment_info: commentStats[0][0],
+            prev_comment_info: prevCommentStats[0][0],
+            comment_mentions: redditMentions[0][0],
+            prev_comment_mentions: prevRedditMentions[0][0],
             article_info: articleCount[0][0],      
             tracking_info: {
                 first_tracking: trackingStart[0][0],

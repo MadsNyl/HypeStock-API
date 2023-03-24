@@ -122,6 +122,15 @@ class Reddit {
         `
     }
 
+    static getCommentLikesAndCountByStockAndInterval(stock, days) {
+        return `
+            SELECT SUM(likes) as comment_likes, COUNT(*) as comment_count
+            FROM comment
+            WHERE symbol = "${stock}"
+            AND comment.created_date >= DATE(DATE_ADD(NOW(), INTERVAL - ${days} DAY) - INTERVAL ${days * 2} DAY)
+        `
+    }
+
     static getTopStocksWithMostLikesInInterval(days, limit) {
         return `
             SELECT symbol, SUM(likes) as count
@@ -142,6 +151,24 @@ class Reddit {
             GROUP BY symbol
             ORDER BY count DESC
             LIMIT ${limit}
+        `
+    }
+
+    static getMentionsByStockAndDays(stock, days) {
+        return `
+            SELECT COUNT(*) as count
+            FROM comment
+            WHERE symbol = "${stock}"
+            AND created_date >= DATE(NOW() - INTERVAL ${days} DAY)
+        `
+    }
+
+    static getMentionsByStockAndInterval(stock, days) {
+        return `
+            SELECT COUNT(*) as count
+            FROM comment
+            WHERE symbol = "${stock}"
+            AND created_date >= DATE(DATE_ADD(NOW(), INTERVAL + ${days} DAY) - INTERVAL ${days * 2} DAY)
         `
     }
 
