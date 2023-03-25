@@ -56,6 +56,19 @@ class Tracking {
         `
     }
 
+    static getMentionsCountByDays(stock, days) {
+        return `
+            SELECT DATE(comment.created_date) as date, COUNT(comment.created_date) + COUNT(article.created_date) as count
+            FROM comment
+            INNER JOIN
+            article_stock ON comment.symbol = article_stock.symbol
+            INNER JOIN
+            article ON article_stock.article_id = article.id
+            WHERE comment.symbol = "${stock}"
+            AND comment.created_date >= DATE(NOW() - INTERVAL ${days} DAY)
+            GROUP BY date
+        `
+    }
 }
 
 module.exports = Tracking;

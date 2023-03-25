@@ -1,5 +1,5 @@
 const express = require("express");
-const { getArticle, getBaseData, getArticlesByProvider, getArticlesWithMostRelatedStocks, getArticlesWithMostRelatedStocksByProvider, getLatestArticles } = require("./controllers/article.controller.js");
+const { getArticle, getBaseData, getArticlesByProvider, getArticlesWithMostRelatedStocks, getArticlesWithMostRelatedStocksByProvider, getLatestArticles, getStockArticles } = require("./controllers/article.controller.js");
 const router = express.Router();
 
 router
@@ -9,5 +9,6 @@ router
     .get("/by_provider", getArticlesByProvider)
     .get("/most_stocks", getArticlesWithMostRelatedStocks)
     .get("/most_stocks_by_provider", getArticlesWithMostRelatedStocksByProvider)
+    .get("/articles", getStockArticles)
 
 module.exports = router;

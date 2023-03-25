@@ -16,7 +16,7 @@ const getBaseData = async (req, res) => {
         const latestRedditComments = await pool.query(Reddit.getLatestComments(limit));
 
         await populateArticlesWithRelatedStocks(latestArticles);
-
+        
 
         return res.send({
             stock_count: stockCount[0][0].count,

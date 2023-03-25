@@ -5,5 +5,6 @@ const router = express.Router();
 
 router
     .get("/", getBaseData)
+    .get("")
 
 module.exports = router;

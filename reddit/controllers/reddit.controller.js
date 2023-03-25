@@ -189,6 +189,30 @@ const getCommentsByStockSearch = async (req, res) => {
     }
 }
 
+// const getStockComments = async (req, res) => {
+
+//     const {stock, days, limit, provider} = req.query;
+
+//     if (!stock || !days || !limit || !provider) return res.sendStatus(400);
+
+//     try {
+//         const articleTrackings = await pool.query(Provider.getStockMentionsByProviderAndStockAndDays(stock, days, provider));
+//         const articles = await pool.query(Article.getArticlesByStockAndDays(stock, days, limit));
+//         const count = await pool.query(Article.getArticleCountByStockAndProviderAndDays(stock, days, provider));
+
+//         return res.send({
+//             stats: articleTrackings[0][0],
+//             articles: articles[0],
+//             count: count[0][0].article_count
+//         });
+
+//     } catch (e) {
+//         console.log(e);
+//         return res.sendStatus(500);
+//     }
+
+// }
+
 
 module.exports = {
     getComment,

@@ -26,6 +26,7 @@ const getBasedata = async (req, res) => {
         const articleTrackings = await pool.query(Tracking.getArticleTrackingsByDays(stock, days));
         const redditMentions = await pool.query(Reddit.getMentionsByStockAndDays(stock, days));
         const prevRedditMentions = await pool.query(Reddit.getMentionsByStockAndInterval(stock, days));
+        const mentionsTracking = await pool.query(Tracking.getMentionsCountByDays(stock, days));
 
 
         // increase of reddit likes
@@ -44,6 +45,7 @@ const getBasedata = async (req, res) => {
             tracking_info: {
                 first_tracking: trackingStart[0][0],
                 trackings: trackings[0],
+                mentions: mentionsTracking[0],
                 reddit: redditTrackings[0],
                 reddit_likes: redditLikes[0],
                 article: articleTrackings[0]

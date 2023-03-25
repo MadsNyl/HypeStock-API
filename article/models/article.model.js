@@ -88,6 +88,18 @@ class Article {
         `
     }
 
+    static getArticleCountByStockAndProviderAndDays(stock, days, provider) {
+        return `
+            SELECT COUNT(*) as article_count
+            FROM article
+            INNER JOIN
+            article_stock ON article.id = article_stock.article_id
+            WHERE symbol = "${stock}"
+            AND provider = "${provider}"
+            AND article.created_date >= DATE(NOW() - INTERVAL ${days} DAY)
+        `
+    }
+
     static getMostMentionedStocksInInterval(limit, days) {
         return `
             SELECT symbol, COUNT(*) as count
@@ -111,6 +123,19 @@ class Article {
             WHERE LENGTH(symbol) > 2
             GROUP BY symbol
             ORDER BY count DESC
+            LIMIT ${limit}
+        `
+    }
+
+    static getArticlesByStockAndDays(stock, days, limit) {
+        return `
+            SELECT *
+            FROM article
+            INNER JOIN
+            article_stock ON article.id = article_stock.article_id
+            WHERE created_date >= DATE(NOW() - INTERVAL ${days} DAY)
+            AND symbol = "${stock}"
+            ORDER BY created_date DESC
             LIMIT ${limit}
         `
     }
