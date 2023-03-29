@@ -5,6 +5,7 @@ const articleRoute = require("./article/router.js");
 const redditRoute = require("./reddit/router.js");
 const homeRoute = require("./home/router.js");
 const trendingRoute = require("./trending/router.js");
+const statsRoute = require("./stats/router.js");
 
 const app = express();
 
@@ -17,5 +18,6 @@ app.use("/api/v1/", homeRoute)
 app.use("/api/v1/articles/", articleRoute);
 app.use("/api/v1/reddit/", redditRoute);
 app.use("/api/v1/trending/", trendingRoute);
+app.use("/api/v1/stats/", statsRoute);
 
 app.listen(8800);
