@@ -19,8 +19,9 @@ class Stock {
         return `
             SELECT *
             FROM stock
-            WHERE symbol = "${stock}"
-            OR name LIKE "%${stock}%"
+            ORDER BY
+            (CASE WHEN symbol = "${stock}" THEN 1 END) DESC,
+            (CASE WHEN name LIKE "%${stock}%" THEN 1 END) DESC
             LIMIT ${limit}
         `
     }
