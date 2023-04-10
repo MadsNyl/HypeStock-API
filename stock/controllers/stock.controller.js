@@ -5,6 +5,7 @@ const Reddit = require("../../reddit/models/reddit.model.js");
 const Subreddit = require("../../reddit/models/subreddit.model.js");
 const Stock = require("../models/stock.model.js");
 const Tracking = require("../models/tracking.model.js");
+const { populateStocksWithTracking } = require("../utils/populateStocks.js");
 
 
 const getBasedata = async (req, res) => {
@@ -74,7 +75,29 @@ const getStockSearch = async (req, res) => {
     }
 }
 
+const getFavorites = async (req, res) => {
+    const { stocks } = req.query;
+
+    if (!stocks) return res.sendStatus(400);
+
+    try {
+        const stockList = stocks.split(",");
+
+        const results = await pool.query(Stock.getFavorites(stockList));
+
+        await populateStocksWithTracking(results[0]);
+
+        return res.send({
+            stocks: results[0]
+        });
+    } catch (e) {
+        console.log(e);
+        return res.sendStatus(500);
+    }
+}
+
 module.exports = {
     getBasedata,
-    getStockSearch
+    getStockSearch,
+    getFavorites
 }

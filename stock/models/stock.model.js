@@ -26,6 +26,14 @@ class Stock {
         `
     }
 
+    static getFavorites(stocks) {
+        return `
+            SELECT *
+            FROM stock
+            WHERE symbol IN (${stocks.map(item => { return `"${item}"` })})
+        `
+    }
+
 }
 
 module.exports = Stock;
