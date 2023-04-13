@@ -6,7 +6,7 @@ class Tracking {
             FROM tracking
             WHERE symbol = "${stock}"
             AND timing >= DATE(NOW() - INTERVAL ${days} DAY)
-            ORDER BY timing DESC
+            ORDER BY timing
         `  
     }
 
