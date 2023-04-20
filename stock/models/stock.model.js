@@ -26,7 +26,7 @@ class Stock {
         `
     }
 
-    static getFavorites(stocks) {
+    static getStocks(stocks) {
         return `
             SELECT *
             FROM stock

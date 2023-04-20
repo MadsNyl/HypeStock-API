@@ -83,7 +83,7 @@ const getFavorites = async (req, res) => {
     try {
         const stockList = stocks.split(",");
 
-        const results = await pool.query(Stock.getFavorites(stockList));
+        const results = await pool.query(Stock.getStocks(stockList));
 
         await populateStocksWithTracking(results[0]);
 
@@ -96,8 +96,27 @@ const getFavorites = async (req, res) => {
     }
 }
 
+const getStocks = async (req, res) => {
+    const { stocks } = req.query;
+
+    if (!stocks) return res.sendStatus(400);
+
+    try {
+        const stockList = stocks.split(",");
+        const results = await pool.query(Stock.getStocks(stockList));
+        
+        
+        await populateStocksWithTracking(results[0]);
+
+    } catch (e) {
+        console.log(e);
+        return res.sendStatus(500);
+    }
+}
+
 module.exports = {
     getBasedata,
     getStockSearch,
-    getFavorites
+    getFavorites,
+    getStocks
 }
