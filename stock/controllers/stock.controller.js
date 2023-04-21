@@ -104,9 +104,27 @@ const getStocks = async (req, res) => {
     try {
         const stockList = stocks.split(",");
         const results = await pool.query(Stock.getStocks(stockList));
-        
-        
+        const redditStats = await pool.query(Reddit.getCommentCountAndLikesByStocksInInterval(stockList, 30));
+        const articleStats = await pool.query(Article.getArticleCountByStocksAndDays(stockList, 30));
+
+        results[0][0].comments = {
+            count: redditStats[0][0].count,
+            likes: parseInt(redditStats[0][0].likes)
+        }
+        results[0][0].articles = {
+            count: articleStats[0][0].count
+        }
+        results[0][1].comments = {
+            count: redditStats[0][1].count,
+            likes: parseInt(redditStats[0][1].likes)
+        }
+        results[0][1].articles = {
+            count: articleStats[0][1].count
+        }
+
         await populateStocksWithTracking(results[0]);
+
+        return res.send(results[0]);
 
     } catch (e) {
         console.log(e);

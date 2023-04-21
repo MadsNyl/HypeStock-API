@@ -194,6 +194,16 @@ class Reddit {
             LIMIT ${limit}
         `
     }
+
+    static getCommentCountAndLikesByStocksInInterval(stocks, days) {
+        return `
+            SELECT symbol, SUM(likes) as likes, COUNT(*) as count
+            FROM comment
+            WHERE symbol IN (${stocks.map(item => { return `"${item}"` })})
+            AND created_date >= DATE(NOW() - INTERVAL ${days} DAY)
+            GROUP BY symbol
+        `
+    }
 }
 
 module.exports = Reddit;
