@@ -5,6 +5,7 @@ const Reddit = require("../../reddit/models/reddit.model.js");
 const Subreddit = require("../../reddit/models/subreddit.model.js");
 const Stock = require("../models/stock.model.js");
 const Tracking = require("../models/tracking.model.js");
+const { pctChange } = require("../utils/pctChange.js");
 const { populateStocksWithTracking } = require("../utils/populateStocks.js");
 
 
@@ -29,6 +30,10 @@ const getBasedata = async (req, res) => {
         const prevRedditMentions = await pool.query(Reddit.getMentionsByStockAndInterval(stock, days));
         const mentionsTracking = await pool.query(Tracking.getMentionsCountByDays(stock, days));
 
+        const priceChangeLastMonth = pctChange(trackings[0].at(-1).last_price, trackings[0][0].last_price);
+        const priceChangeLastDay = pctChange(trackings[0].at(-1).last_price, trackings[0].at(-2).last_price)
+        const mentionChangeLastMonth = pctChange(mentionsTracking[0].at(-1).count, mentionsTracking[0][0].count);
+        const mentionChangeLastDay = pctChange(mentionsTracking[0].at(-1).count, mentionsTracking[0].at(-2).count);
 
         // increase of reddit likes
         // increase of mentions in reddit
@@ -49,7 +54,11 @@ const getBasedata = async (req, res) => {
                 mentions: mentionsTracking[0],
                 reddit: redditTrackings[0],
                 reddit_likes: redditLikes[0],
-                article: articleTrackings[0]
+                article: articleTrackings[0],
+                price_change_month: priceChangeLastMonth.toFixed(2),
+                price_change_day: priceChangeLastDay.toFixed(2),
+                mention_change_month: mentionChangeLastMonth.toFixed(2),
+                mention_change_day: mentionChangeLastDay.toFixed(2), 
             }
         });
     } catch (e) {
