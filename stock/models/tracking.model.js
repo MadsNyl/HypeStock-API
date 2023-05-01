@@ -22,43 +22,40 @@ class Tracking {
 
     static getArticleTrackingsByDays(stock, days) {
         return `
-            SELECT COUNT(*) as count
+            SELECT created_date, COUNT(*) as count
             FROM article
             INNER JOIN 
             article_stock
             ON article.id = article_stock.article_id
             WHERE symbol = "${stock}"
-            GROUP BY DAY(created_date)
-            ORDER BY DAY(created_date)
-            LIMIT ${days}
+            and created_date >= DATE(NOW() - INTERVAL ${days} DAY)
+            GROUP BY created_date
         `
     }
 
     static getRedditTrackingsByDays(stock, days) {
         return `
-            SELECT COUNT(*) as count
+            SELECT created_date, COUNT(*) as count
             FROM comment
             WHERE symbol = "${stock}"
-            GROUP BY DAY(created_date)
-            ORDER BY DAY(created_date)
-            LIMIT ${days}
+            AND created_date >= DATE(NOW() - INTERVAL ${days} DAY)
+            GROUP BY created_date
         `
     }
 
     static getRedditLikesByDays(stock, days) {
         return `
-            SELECT SUM(likes) as likes
+            SELECT created_date, SUM(likes) as count
             FROM comment
             WHERE symbol = "${stock}"
-            GROUP BY DAY(created_date)
-            ORDER BY DAY(created_date)
-            LIMIT ${days}
+            AND created_date >= DATE(NOW() - INTERVAL ${days} DAY)
+            GROUP BY created_date
         `
     }
 
     static getMentionsCountByDays(stock, days) {
         return `
-            SELECT DATE(comment.created_date) as date, COUNT(comment.created_date) + COUNT(article.created_date) as count
+            SELECT DATE(comment.created_date) as created_date, COUNT(comment.created_date) + COUNT(article.created_date) as count
             FROM comment
             INNER JOIN
             article_stock ON comment.symbol = article_stock.symbol
@@ -66,7 +63,7 @@ class Tracking {
             article ON article_stock.article_id = article.id
             WHERE comment.symbol = "${stock}"
             AND comment.created_date >= DATE(NOW() - INTERVAL ${days} DAY)
-            GROUP BY date
+            GROUP BY created_date
         `
     }
 }

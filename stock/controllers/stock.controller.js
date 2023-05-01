@@ -5,6 +5,8 @@ const Reddit = require("../../reddit/models/reddit.model.js");
 const Subreddit = require("../../reddit/models/subreddit.model.js");
 const Stock = require("../models/stock.model.js");
 const Tracking = require("../models/tracking.model.js");
+const { pearsonCorrelation } = require("../utils/correlation.js");
+const { fillMissingDates, fillMissingData } = require("../utils/fillArrays.js");
 const { pctChange } = require("../utils/pctChange.js");
 const { populateStocksWithTracking } = require("../utils/populateStocks.js");
 
@@ -30,14 +32,46 @@ const getBasedata = async (req, res) => {
         const prevRedditMentions = await pool.query(Reddit.getMentionsByStockAndInterval(stock, days));
         const mentionsTracking = await pool.query(Tracking.getMentionsCountByDays(stock, days));
 
-        const priceChangeLastMonth = pctChange(trackings[0].at(-1).last_price, trackings[0][0].last_price);
-        const priceChangeLastDay = pctChange(trackings[0].at(-1).last_price, trackings[0].at(-2).last_price)
-        const mentionChangeLastMonth = pctChange(mentionsTracking[0].at(-1).count, mentionsTracking[0][0].count);
-        const mentionChangeLastDay = pctChange(mentionsTracking[0].at(-1).count, mentionsTracking[0].at(-2).count);
+        const filledTrackings = fillMissingDates(trackings[0], days);
+        const filledMentions = fillMissingData(mentionsTracking[0], days);
+        const filledReddit = fillMissingData(redditTrackings[0], days);
+        const filledRedditLikes = fillMissingData(redditLikes[0], days);
+        const filledArticles = fillMissingData(articleTrackings[0], days);
 
-        // increase of reddit likes
-        // increase of mentions in reddit
-        // increase of mentions in articles
+
+        const correlationPriceArray = filledTrackings.map(item => { return item.last_price; }); 
+
+        const correlationPriceAndReddit = pearsonCorrelation(
+            correlationPriceArray,
+            filledMentions.map(item => { return item.count; })
+        );
+
+        const correlationPriceAndLikes = pearsonCorrelation(
+            correlationPriceArray,
+            filledRedditLikes.map(item => { return item.count; })
+        );
+
+        const correlationPriceAndArticles = pearsonCorrelation(
+            correlationPriceArray,
+            filledArticles.map(item => { return item.count; })
+        );
+
+        const correlationPriceAndMentions = pearsonCorrelation(
+            correlationPriceArray,
+            filledMentions.map(item => { return item.count; })
+        );
+
+        let priceChangeLastMonth = 0;
+        let priceChangeLastDay = 0;
+        let mentionChangeLastMonth = 0;
+        let mentionChangeLastDay = 0;
+
+        if (filledTrackings.length && filledMentions.length) {
+            priceChangeLastMonth = pctChange(filledTrackings.at(-1).last_price, filledTrackings[0].last_price);
+            priceChangeLastDay = pctChange(filledTrackings.at(-1).last_price, filledTrackings.at(-2).last_price)
+            mentionChangeLastMonth = pctChange(filledMentions.at(-1).count, filledMentions[0].count);
+            mentionChangeLastDay = pctChange(filledMentions.at(-1).count, filledMentions.at(-2).count);
+        }
 
         return res.send({
             stock_info: stockInfo[0][0],
@@ -50,15 +84,21 @@ const getBasedata = async (req, res) => {
             article_info: articleCount[0][0],      
             tracking_info: {
                 first_tracking: trackingStart[0][0],
-                trackings: trackings[0],
-                mentions: mentionsTracking[0],
-                reddit: redditTrackings[0],
-                reddit_likes: redditLikes[0],
-                article: articleTrackings[0],
+                trackings: filledTrackings,
+                mentions: filledMentions,
+                reddit: filledReddit,
+                reddit_likes: filledRedditLikes,
+                article: filledArticles,
                 price_change_month: priceChangeLastMonth.toFixed(2),
                 price_change_day: priceChangeLastDay.toFixed(2),
                 mention_change_month: mentionChangeLastMonth.toFixed(2),
                 mention_change_day: mentionChangeLastDay.toFixed(2), 
+            },
+            correlation: {
+                price_reddit: correlationPriceAndReddit.toFixed(3),
+                price_likes: correlationPriceAndLikes.toFixed(3),
+                price_articles: correlationPriceAndArticles.toFixed(3),
+                price_mentions: correlationPriceAndMentions.toFixed(3)
             }
         });
     } catch (e) {
