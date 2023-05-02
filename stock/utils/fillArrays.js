@@ -54,7 +54,7 @@ const fillMissingData = (array, days) => {
                 count: 0
             });
         } else {
-            const arrayTiming = array[currentIndex].created_date.toISOString().slice(0, 10);
+            const arrayTiming = new Date(array[currentIndex].created_date).toISOString().slice(0, 10);
             const currentTiming = currentDate.toISOString().slice(0, 10);
 
             if (arrayTiming === currentTiming) {

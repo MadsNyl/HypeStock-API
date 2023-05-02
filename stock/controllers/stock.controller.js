@@ -31,10 +31,10 @@ const getBasedata = async (req, res) => {
         const redditMentions = await pool.query(Reddit.getMentionsByStockAndDays(stock, days));
         const prevRedditMentions = await pool.query(Reddit.getMentionsByStockAndInterval(stock, days));
         const mentionsTracking = await pool.query(Tracking.getMentionsCountByDays(stock, days));
-
+        
         const filledTrackings = fillMissingDates(trackings[0], days);
         const filledMentions = fillMissingData(mentionsTracking[0], days);
-        const filledReddit = fillMissingData(redditTrackings[0], days);
+        const filledReddit = fillMissingData(redditMentions[0], days);
         const filledRedditLikes = fillMissingData(redditLikes[0], days);
         const filledArticles = fillMissingData(articleTrackings[0], days);
 

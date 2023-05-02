@@ -156,10 +156,11 @@ class Reddit {
 
     static getMentionsByStockAndDays(stock, days) {
         return `
-            SELECT COUNT(*) as count
+            SELECT DATE_FORMAT(created_date, "%Y-%m-%d") as created_date, COUNT(*) as count
             FROM comment
             WHERE symbol = "${stock}"
             AND created_date >= DATE(NOW() - INTERVAL ${days} DAY)
+            GROUP BY DATE_FORMAT(created_date, "%Y-%m-%d")
         `
     }
 
@@ -169,6 +170,7 @@ class Reddit {
             FROM comment
             WHERE symbol = "${stock}"
             AND created_date >= DATE(DATE_ADD(NOW(), INTERVAL + ${days} DAY) - INTERVAL ${days * 2} DAY)
+            GROUP BY created_date
         `
     }
 
